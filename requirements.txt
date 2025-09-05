@@ -54,4 +54,5 @@ google-auth-oauthlib
 hdbscan
 optuna
 plotly
+boto3>=1.34.0
 

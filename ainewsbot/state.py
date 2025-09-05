@@ -83,7 +83,7 @@ from .llm_output_schemas import (
 from .scrape import (
     parse_file, fetch_queue, fetch_source_queue, normalize_html,)
 from .utilities import (log, delete_files, get_model, filter_unseen_urls_db,
-                        nearest_neighbor_sort, send_gmail, unicode_to_ascii)
+                        nearest_neighbor_sort, send_gmail, send_email, unicode_to_ascii)
 from .config import (DOWNLOAD_DIR, TEXT_DIR, PAGES_DIR, SCREENSHOT_DIR, OUTPUT_DIR,
                      CHROMA_DB_PATH, DATA_ROOT,
                      SOURCECONFIG,
@@ -1875,7 +1875,7 @@ def fn_compose_summary(state: AgentState, model_high: any) -> AgentState:
     # send email html_str
     log("Sending bullet points email")
     subject = f'AI news bullets {datetime.now().strftime("%H:%M:%S")}'
-    send_gmail(subject, html_str)
+    send_email(subject, html_str)
 
     # same with a delimiter and no ID, to save as a txt file to use downstream
     bullet_str = "\n~~~\n".join(aidf['bullet'])
@@ -1993,5 +1993,5 @@ def fn_send_mail(state: AgentState) -> AgentState:
     log(f"Email length {len(html_str)}")
 
     # send email
-    send_gmail(subject, html_str)
+    send_email(subject, html_str)
     return state

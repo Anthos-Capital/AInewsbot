@@ -410,3 +410,44 @@ def send_gmail(subject, html_str):
         server.login(email_address, os.getenv("GMAIL_PASSWORD"))
         text = message.as_string()
         server.sendmail(email_address, email_address, text)
+
+
+def send_email(subject, html_str):
+    """Send email using configured delivery method
+    
+    Routes email sending to the appropriate service based on
+    EMAIL_DELIVERY environment variable.
+    
+    Args:
+        subject: Email subject line
+        html_str: HTML content for email body
+        
+    Returns:
+        bool: Success status
+    """
+    delivery_method = os.getenv('EMAIL_DELIVERY', 'ses').lower()
+    
+    if delivery_method == 'ses':
+        # Use AWS SES
+        from .ses_delivery import send_ses
+        return send_ses(subject, html_str)
+    elif delivery_method == 'gmail':
+        # Fallback to Gmail SMTP
+        log("Using Gmail delivery (deprecated - consider switching to SES)")
+        return send_gmail(subject, html_str)
+    elif delivery_method == 'file':
+        # Save to file for testing/development
+        import datetime
+        filename = f"email_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
+        filepath = os.path.join('out', filename)
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(f"Subject: {subject}\n\n{html_str}")
+            log(f"Email saved to file: {filepath}")
+            return True
+        except Exception as e:
+            log(f"Error saving email to file: {e}")
+            return False
+    else:
+        log(f"Unknown delivery method: {delivery_method}")
+        return False
